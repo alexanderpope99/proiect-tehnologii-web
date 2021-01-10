@@ -19,6 +19,6 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.transactions = require('./transaction.model.js')(sequelize, Sequelize);
+db.expenses = require('./expense.model.js')(sequelize, Sequelize);
 
 module.exports = db;

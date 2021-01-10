@@ -25,10 +25,10 @@ db.sequelize.sync();
 
 // simple route
 app.get('/', (req, res) => {
-  res.json({ message: 'Domentenean' });
+  res.json({ message: 'API funcționează' });
 });
 
-require('./routes/transaction.routes')(app);
+require('./routes/expense.routes')(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
