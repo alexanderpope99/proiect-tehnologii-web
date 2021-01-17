@@ -16,9 +16,21 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
 
 const db = {};
 
-db.Sequelize = Sequelize;
 db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
 db.expenses = require('./expense.model.js')(sequelize, Sequelize);
+db.categories = require('./category.model.js')(sequelize, Sequelize);
+
+db.categories.hasMany(db.expenses, {
+  as: 'expenses',
+  onDelete: 'cascade',
+});
+db.expenses.belongsTo(db.categories, {
+  as: 'category',
+  foreignKey: 'categoryId',
+  onDelete: 'cascade',
+  targetKey: 'id',
+});
 
 module.exports = db;

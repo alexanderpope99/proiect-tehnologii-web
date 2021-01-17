@@ -1,12 +1,11 @@
+import React from 'react';
 import './App.css';
-import Grids from './components/Grids';
-import NavBar from './components/NavBar';
+import MyApp from './components/MyApp';
 
 function App() {
   return (
     <div className="App">
-      <NavBar />
-      <Grids />
+      <MyApp />
     </div>
   );
 }
