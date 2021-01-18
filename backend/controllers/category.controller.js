@@ -1,13 +1,14 @@
 const db = require('../models');
+const Sequelize = require('sequelize');
 const Category = db.categories;
-const Op = db.Sequelize.Op;
+const Expense = db.expenses;
 
 // Create and Save a new Category
 exports.create = (req, res) => {
   // Validate request
-  if (!req.body.name) {
+  if (!req.body.name || !req.body.color) {
     res.status(400).send({
-      message: 'Numele nu poate fi gol!',
+      message: 'Numele sau culoarea nu pot fi goale!',
     });
     return;
   }
@@ -15,6 +16,7 @@ exports.create = (req, res) => {
   // Create a Category
   const category = {
     name: req.body.name,
+    color: req.body.color,
   };
 
   // Save Category in the database
@@ -31,7 +33,20 @@ exports.create = (req, res) => {
 
 // Retrieve all Categories from the database.
 exports.findAll = (req, res) => {
-  Category.findAll()
+  Category.findAll({
+    order: [['id', 'ASC']],
+    attributes: {
+      include: [[Sequelize.fn('SUM', Sequelize.col('expenses.amount')), 'expensesSum']],
+    },
+    include: [
+      {
+        model: Expense,
+        as: 'expenses',
+        attributes: [],
+      },
+    ],
+    group: ['category.id'],
+  })
     .then((data) => {
       res.send(data);
     })

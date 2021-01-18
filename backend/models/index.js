@@ -24,12 +24,10 @@ db.categories = require('./category.model.js')(sequelize, Sequelize);
 
 db.categories.hasMany(db.expenses, {
   as: 'expenses',
-  onDelete: 'cascade',
 });
 db.expenses.belongsTo(db.categories, {
   as: 'category',
   foreignKey: 'categoryId',
-  onDelete: 'cascade',
   targetKey: 'id',
 });
 

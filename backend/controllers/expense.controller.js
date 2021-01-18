@@ -1,12 +1,11 @@
 const db = require('../models');
 const Expense = db.expenses;
 const Category = db.categories;
-const Op = db.Sequelize.Op;
 
 // Create and Save a new Expense
 exports.create = (req, res) => {
   // Validate request
-  if (!req.body.name || !req.body.categoryId || !req.body.date || !req.body.amount) {
+  if (!req.body.name || !req.body.date || !req.body.amount) {
     res.status(400).send({
       message: 'Niciun câmp nu poate fi gol',
     });
@@ -36,6 +35,7 @@ exports.create = (req, res) => {
 // Retrieve all Expenses from the database.
 exports.findAll = (req, res) => {
   Expense.findAll({
+    order: [['date', 'DESC']],
     attributes: { exclude: ['categoryId'] },
     include: [
       {
