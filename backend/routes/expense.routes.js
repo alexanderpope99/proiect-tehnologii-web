@@ -9,9 +9,6 @@ module.exports = (app) => {
   // Retrieve all Expenses
   router.get('/', Expenses.findAll);
 
-  // Retrieve all published Expenses
-  router.get('/published', Expenses.findAllPublished);
-
   // Retrieve a single Expense with id
   router.get('/:id', Expenses.findOne);
 

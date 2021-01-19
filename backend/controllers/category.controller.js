@@ -13,6 +13,13 @@ exports.create = (req, res) => {
     return;
   }
 
+  if (req.body.name === '-') {
+    res.status(400).send({
+      message: 'Numele nu poate fi "-"!',
+    });
+    return;
+  }
+
   // Create a Category
   const category = {
     name: req.body.name,
@@ -74,6 +81,18 @@ exports.findOne = (req, res) => {
 
 // Update a Category by the id in the request
 exports.update = (req, res) => {
+  if (!req.body.name || !req.body.color) {
+    res.status(400).send({
+      message: 'Numele sau culoarea nu pot fi goale!',
+    });
+    return;
+  }
+  if (req.body.name === '-') {
+    res.status(500).send({
+      message: 'Numele nu poate fi "-"!',
+    });
+    return;
+  }
   const id = req.params.id;
 
   Category.update(req.body, {
@@ -82,11 +101,11 @@ exports.update = (req, res) => {
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: 'Categorie actualizată cu succes',
+          message: `Categoria cu id ${id} actualizată cu succes`,
         });
       } else {
-        res.send({
-          message: `Nu s-a putut actualiza categoria`,
+        res.status(404).send({
+          message: `Nu s-a găsit categoria cu id ${id}`,
         });
       }
     })
@@ -107,17 +126,17 @@ exports.delete = (req, res) => {
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: 'Categorie ștearsă cu succes',
+          message: `Categoria cu id ${id} ștearsă cu succes`,
         });
       } else {
         res.send({
-          message: `Nu am putut șterge categoria cu id ${id}`,
+          message: `Nu s-a găsit categoria cu id ${id}`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: 'Nu am putut șterge categoria cu id ' + id,
+        message: 'Eroare la ștergerea categoriei cu id ' + id,
       });
     });
 };

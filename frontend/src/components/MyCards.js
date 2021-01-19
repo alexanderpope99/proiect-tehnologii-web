@@ -25,6 +25,7 @@ export default class MyCards extends React.Component {
     this.editCategory = this.editCategory.bind(this);
     this.deleteCategory = this.deleteCategory.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
     this.state = {
       categories: [],
       show: false,
@@ -32,6 +33,7 @@ export default class MyCards extends React.Component {
       isEdit: false,
       categoryColor: '',
       categoryId: '',
+      pressedSubmit: false,
     };
   }
 
@@ -85,16 +87,14 @@ export default class MyCards extends React.Component {
         console.log(error);
       });
     if (data) {
-      this.setState({
-        show: false,
-        categoryName: '',
-      });
+      this.handleClose();
       await this.getCategories();
+      this.props.update();
     }
   }
 
   async updateCategory() {
-    await axios
+    const data = await axios
       .put(`${server}/api/categories/${this.state.categoryId}`, {
         color: this.state.categoryColor,
         name: this.state.categoryName,
@@ -105,9 +105,11 @@ export default class MyCards extends React.Component {
       .catch(function (error) {
         console.log(error);
       });
-    this.handleClose();
-    await this.getCategories();
-    this.props.update();
+    if (data) {
+      this.handleClose();
+      await this.getCategories();
+      this.props.update();
+    }
   }
 
   async editCategory(e) {
@@ -117,6 +119,7 @@ export default class MyCards extends React.Component {
       categoryId: e.id,
       isEdit: true,
       show: true,
+      pressedSubmit: false,
     });
   }
 
@@ -130,34 +133,45 @@ export default class MyCards extends React.Component {
         console.log(error);
       });
     await this.getCategories();
-    this.setState({ show: false, categoryName: '', categoryColor: '' });
+    this.setState({ show: false, pressedSubmit: false, categoryName: '', categoryColor: '' });
     this.props.update();
   }
 
   handleClose() {
-    this.setState({ show: false, categoryName: '', categoryColor: '' });
+    this.setState({ show: false, pressedSubmit: false, categoryName: '', categoryColor: '' });
+  }
+
+  onSubmit(e) {
+    e.preventDefault();
+    this.setState({ pressedSubmit: true });
+    if (this.state.isEdit) this.updateCategory();
+    else this.addCategory();
   }
 
   render() {
     return (
       <div>
         <Modal show={this.state.show} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {' '}
-              {this.state.isEdit ? 'Editează Categorie' : 'Adaugă Categorie'}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form onSubmit={this.state.isEdit ? this.updateCategory : this.addCategory}>
+          <Form onSubmit={this.onSubmit}>
+            <Modal.Header closeButton>
+              <Modal.Title>
+                {' '}
+                {this.state.isEdit ? 'Editează Categorie' : 'Adaugă Categorie'}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
               <Form.Group controlId="formName">
                 <Form.Label>Nume</Form.Label>
                 <Form.Control
                   onChange={(e) => this.setState({ categoryName: e.target.value })}
                   type="text"
                   placeholder="Nume categorie"
+                  isInvalid={this.state.categoryName === '' && this.state.pressedSubmit}
                   value={this.state.categoryName}
                 />
+                <Form.Control.Feedback type="invalid">
+                  Numele trebuie completat
+                </Form.Control.Feedback>
               </Form.Group>
               <InputGroup className="mb-3">
                 <DropdownButton
@@ -180,25 +194,26 @@ export default class MyCards extends React.Component {
                   aria-describedby="basic-addon1"
                   readOnly
                   onChange={(e) => this.setState({ categoryColor: e.target.value })}
+                  isInvalid={this.state.categoryColor === '' && this.state.pressedSubmit}
                 />
+                <Form.Control.Feedback type="invalid">
+                  Culoarea trebuie aleasă
+                </Form.Control.Feedback>
               </InputGroup>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            {this.state.isEdit ? (
-              <Button variant="outline-danger" onClick={this.deleteCategory}>
-                Șterge
+            </Modal.Body>
+            <Modal.Footer>
+              {this.state.isEdit ? (
+                <Button variant="outline-danger" onClick={this.deleteCategory}>
+                  Șterge
+                </Button>
+              ) : (
+                ''
+              )}
+              <Button variant="primary" type="submit">
+                {this.state.isEdit ? 'Actualizează' : 'Adaugă'}
               </Button>
-            ) : (
-              ''
-            )}
-            <Button
-              variant="primary"
-              onClick={this.state.isEdit ? this.updateCategory : this.addCategory}
-            >
-              {this.state.isEdit ? 'Actualizează' : 'Adaugă'}
-            </Button>
-          </Modal.Footer>
+            </Modal.Footer>
+          </Form>
         </Modal>
         <Table responsive>
           <thead>

@@ -16,6 +16,7 @@ export default class MyTable extends React.Component {
     this.handleClose = this.handleClose.bind(this);
     this.handleOpen = this.handleOpen.bind(this);
     this.addExpense = this.addExpense.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
     this.state = {
       expenses: [],
       isEdit: false,
@@ -27,6 +28,7 @@ export default class MyTable extends React.Component {
       categoryName: '-',
       categoryId: '',
       expenseId: '',
+      pressedSubmit: false,
     };
   }
 
@@ -106,7 +108,7 @@ export default class MyTable extends React.Component {
         expenseName: e.name,
         expenseDate: e.date,
         expenseAmount: e.amount,
-        categoryid: e.category ? e.category.id : null,
+        categoryId: e.category ? e.category.id : null,
         categoryName: e.category ? e.category.name : '-',
         isEdit: true,
         show: true,
@@ -114,7 +116,7 @@ export default class MyTable extends React.Component {
   }
 
   async updateExpense() {
-    await axios
+    const data = await axios
       .put(`${server}/api/expenses/${this.state.expenseId}`, {
         name: this.state.expenseName,
         date: this.state.expenseDate,
@@ -127,9 +129,11 @@ export default class MyTable extends React.Component {
       .catch(function (error) {
         console.log(error);
       });
-    this.handleClose();
-    await this.getExpenses();
-    this.props.update();
+    if (data) {
+      this.handleClose();
+      await this.getExpenses();
+      this.props.update();
+    }
   }
 
   async getCategories() {
@@ -154,7 +158,7 @@ export default class MyTable extends React.Component {
   }
 
   async deleteExpense(e) {
-    await axios
+    const data = await axios
       .delete(`${server}/api/expenses/${e}`)
       .then(function (res) {
         return res.data;
@@ -162,12 +166,21 @@ export default class MyTable extends React.Component {
       .catch(function (error) {
         console.log(error);
       });
-    await this.getExpenses();
-    this.props.update();
+    if (data) {
+      await this.getExpenses();
+      this.props.update();
+    }
   }
 
   async addExpense() {
-    await axios
+    const body = {
+      name: this.state.expenseName,
+      date: this.state.expenseDate,
+      amount: this.state.expenseAmount,
+      categoryId: this.state.categoryName === '-' ? null : this.state.categoryId,
+    };
+    console.log(body);
+    const data = await axios
       .post(`${server}/api/expenses/`, {
         name: this.state.expenseName,
         date: this.state.expenseDate,
@@ -180,9 +193,11 @@ export default class MyTable extends React.Component {
       .catch(function (error) {
         console.log(error);
       });
-    this.handleClose();
-    await this.getExpenses();
-    this.props.update();
+    if (data) {
+      this.handleClose();
+      await this.getExpenses();
+      this.props.update();
+    }
   }
 
   async handleOpen() {
@@ -192,6 +207,7 @@ export default class MyTable extends React.Component {
 
   handleClose() {
     this.setState({
+      pressedSubmit: false,
       show: false,
       expenseName: '',
       categoryName: '-',
@@ -200,25 +216,36 @@ export default class MyTable extends React.Component {
     });
   }
 
+  onSubmit(e) {
+    e.preventDefault();
+    this.setState({ pressedSubmit: true });
+    if (this.state.isEdit) this.updateExpense();
+    else this.addExpense();
+  }
+
   render() {
     return (
       <Col>
         <Modal show={this.state.show} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {this.state.isEdit ? 'Editează Cheltuială' : 'Adaugă Cheltuială'}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form onSubmit={this.state.isEdit ? this.updateExpense : this.addExpense}>
+          <Form onSubmit={this.onSubmit}>
+            <Modal.Header closeButton>
+              <Modal.Title>
+                {this.state.isEdit ? 'Editează Cheltuială' : 'Adaugă Cheltuială'}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
               <Form.Group controlId="formName">
                 <Form.Label>Nume</Form.Label>
                 <Form.Control
                   onChange={(e) => this.setState({ expenseName: e.target.value })}
                   type="text"
                   placeholder="Nume cheltuială"
+                  isInvalid={this.state.expenseName === '' && this.state.pressedSubmit}
                   value={this.state.expenseName}
                 />
+                <Form.Control.Feedback type="invalid">
+                  Numele trebuie completat
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group controlId="formCategory">
                 <Form.Label>Categorie</Form.Label>
@@ -243,8 +270,12 @@ export default class MyTable extends React.Component {
                 <Form.Control
                   onChange={(e) => this.setState({ expenseDate: e.target.value })}
                   type="date"
+                  isInvalid={this.state.expenseDate === '' && this.state.pressedSubmit}
                   value={this.state.expenseDate}
                 />
+                <Form.Control.Feedback type="invalid">
+                  Data trebuie completată
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group controlId="formDate">
                 <Form.Label>Sumă</Form.Label>
@@ -255,18 +286,19 @@ export default class MyTable extends React.Component {
                   min="0"
                   step="0.01"
                   value={this.state.expenseAmount}
+                  isInvalid={this.state.expenseAmount === '' && this.state.pressedSubmit}
                 />
+                <Form.Control.Feedback type="invalid">
+                  Suma trebuie completată
+                </Form.Control.Feedback>
               </Form.Group>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="primary"
-              onClick={this.state.isEdit ? this.updateExpense : this.addExpense}
-            >
-              {this.state.isEdit ? 'Actualizează' : 'Adaugă'}
-            </Button>
-          </Modal.Footer>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="primary" type="submit">
+                {this.state.isEdit ? 'Actualizează' : 'Adaugă'}
+              </Button>
+            </Modal.Footer>
+          </Form>
         </Modal>
         <Row>
           <Col>

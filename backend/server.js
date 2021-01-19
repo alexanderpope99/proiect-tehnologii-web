@@ -19,11 +19,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const db = require('./models');
 db.sequelize.sync();
 // // drop the table if it already exists
-// db.sequelize.sync({ force: true }).then(() => {
-//   console.log("Drop and re-sync db.");
-// });
 
-// simple route
+// simple route to check api
 app.get('/', (req, res) => {
   res.json({ message: 'API funcționează' });
 });

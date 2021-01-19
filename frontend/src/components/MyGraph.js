@@ -9,6 +9,7 @@ export default class MyGraph extends React.Component {
     this.getCategories = this.getCategories.bind(this);
     this.state = {
       data: [],
+      sum: null,
     };
   }
 
@@ -27,24 +28,34 @@ export default class MyGraph extends React.Component {
       });
     if (data) {
       const array = [];
+      var sum = 0;
       data.forEach(function (val) {
-        array.push({ title: val.name, value: val.expensesSum, color: val.color });
+        if (val.expensesSum) sum += val.expensesSum;
+        array.push({
+          title: val.name,
+          value: val.expensesSum ? val.expensesSum : null,
+          color: val.color,
+        });
       });
       this.setState({
         data: array,
+        sum: sum,
       });
     }
   }
-
   render() {
-    return (
+    return this.state.sum ? (
       <PieChart
-        animation
-        animationDuration={500}
-        animationEasing="ease-out"
+        viewBoxSize={[120, 120]}
+        labelStyle={{ fontSize: '7' }}
+        onMouseOver={(e, index) => console.log(e)}
         data={this.state.data}
-        label={({ dataEntry }) => dataEntry.value}
+        label={({ dataEntry }) =>
+          parseFloat((dataEntry.value / this.state.sum) * 100).toFixed(2) + '%'
+        }
       />
+    ) : (
+      <div>Nu există categorii sau sunt nule</div>
     );
   }
 }

@@ -25,10 +25,10 @@ export default class MyApp extends React.Component {
     return (
       <div>
         <MyNavbar />
-        <Container style={{ backgroundColor: '#f5f7fb', marginBottom: '50' }}>
+        <Container style={{ backgroundColor: '#f5f7fb' }}>
           <MyCards ref={this.myCards} update={this.refreshMyTable} />
           <Container>
-            <Row style={{ marginTop: '500' }}>
+            <Row>
               <MyTable ref={this.myTable} update={this.refreshMyCards} />
               <Col>
                 <h2>Grafic</h2>
@@ -36,7 +36,7 @@ export default class MyApp extends React.Component {
               </Col>
             </Row>
           </Container>
-          {/* <MyFooter /> */}
+          <MyFooter style={{ marginTop: '300' }} />
         </Container>
       </div>
     );

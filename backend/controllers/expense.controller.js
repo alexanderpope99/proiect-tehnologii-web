@@ -12,6 +12,13 @@ exports.create = (req, res) => {
     return;
   }
 
+  if (isNaN(req.body.amount)) {
+    res.status(400).send({
+      message: 'Suma trebuie să fie număr',
+    });
+    return;
+  }
+
   // Create a Expense
   const expense = {
     name: req.body.name,
@@ -54,7 +61,7 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single Expenses with an id
+// Find a single Expense with an id
 exports.findOne = (req, res) => {
   const id = req.params.id;
 
@@ -64,14 +71,27 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: 'Error retrieving Expense with id=' + id,
+        message: err.message || 'A apărut o eroare la preluare',
       });
     });
 };
 
-// Update a Expense by the id in the request
+// Update an Expense by the id in the request
 exports.update = (req, res) => {
+  if (!req.body.name || !req.body.date || !req.body.amount) {
+    res.status(400).send({
+      message: 'Niciun câmp nu poate fi gol',
+    });
+    return;
+  }
   const id = req.params.id;
+
+  if (isNaN(req.body.amount)) {
+    res.status(400).send({
+      message: 'Suma trebuie să fie număr',
+    });
+    return;
+  }
 
   Expense.update(req.body, {
     where: { id: id },
@@ -79,22 +99,22 @@ exports.update = (req, res) => {
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: 'Expense was updated successfully.',
+          message: `Cheltuiala cu id ${id} actualizată cu succes`,
         });
       } else {
-        res.send({
-          message: `Cannot update Expense with id=${id}. Maybe Expense was not found or req.body is empty!`,
+        res.status(404).send({
+          message: `Nu s-a găsit cheltuiala cu id ${id}`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: 'Error updating Expense with id=' + id,
+        message: 'Eroare la actualizarea cheltuielii cu id ' + id,
       });
     });
 };
 
-// Delete a Expense with the specified id in the request
+// Delete an Expense with the specified id in the request
 exports.delete = (req, res) => {
   const id = req.params.id;
 
@@ -104,17 +124,17 @@ exports.delete = (req, res) => {
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: 'Expense was deleted successfully!',
+          message: `Cheltuiala cu id ${id} ștearsă cu succes`,
         });
       } else {
-        res.send({
-          message: `Cannot delete Expense with id=${id}. Maybe Expense was not found!`,
+        res.status(404).send({
+          message: `Nu s-a găsit cheltuiala cu id ${id}`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: 'Could not delete Expense with id=' + id,
+        message: 'Eroare la ștergerea categoriei cu id ' + id,
       });
     });
 };
@@ -126,24 +146,11 @@ exports.deleteAll = (req, res) => {
     truncate: false,
   })
     .then((nums) => {
-      res.send({ message: `${nums} Expenses were deleted successfully!` });
+      res.send({ message: `${nums} cheltuieli au fost șterse` });
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || 'Some error occurred while removing all expenses.',
-      });
-    });
-};
-
-// Find all published Expenses
-exports.findAllPublished = (req, res) => {
-  Expense.findAll({ where: { published: true } })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || 'Some error occurred while retrieving expenses.',
+        message: err.message || 'A apărut o eroare la ștergerea cheltuielilor',
       });
     });
 };
