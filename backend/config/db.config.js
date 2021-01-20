@@ -1,7 +1,7 @@
 module.exports = {
   HOST: 'localhost',
-  USER: 'webadmin',
-  PASSWORD: 'webadmin',
+  USER: 'postgres',
+  PASSWORD: 'postgres',
   DB: 'tehnweb',
   dialect: 'postgres',
   pool: {
