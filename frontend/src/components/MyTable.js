@@ -179,7 +179,6 @@ export default class MyTable extends React.Component {
       amount: this.state.expenseAmount,
       categoryId: this.state.categoryName === '-' ? null : this.state.categoryId,
     };
-    console.log(body);
     const data = await axios
       .post(`${server}/api/expenses/`, {
         name: this.state.expenseName,

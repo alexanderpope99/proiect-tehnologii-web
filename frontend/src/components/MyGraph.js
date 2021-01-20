@@ -48,7 +48,6 @@ export default class MyGraph extends React.Component {
       <PieChart
         viewBoxSize={[120, 120]}
         labelStyle={{ fontSize: '7' }}
-        onMouseOver={(e, index) => console.log(e)}
         data={this.state.data}
         label={({ dataEntry }) =>
           parseFloat((dataEntry.value / this.state.sum) * 100).toFixed(2) + '%'
